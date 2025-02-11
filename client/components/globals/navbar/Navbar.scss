@@ -1,0 +1,93 @@
+$mobile: 576px;
+$tablet: 768px;
+
+nav {
+    display: flex;
+    position: relative;
+
+    @media (max-width: $mobile) {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    @media (min-width: $mobile) {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+.hamburger {
+    display: none;
+    cursor: pointer;
+
+    @media (max-width: $mobile) {
+        display: block;
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-size: 1.5rem;
+
+    @media (max-width: $tablet) {
+        font-size: 1.25rem;
+    }
+
+    @media (max-width: $mobile) {
+        font-size: 1rem;
+    }
+}
+
+.button {
+    border: none;
+    border-radius: 5px;
+
+    @media (max-width: $tablet) {
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: $mobile) {
+        font-size: 0.8rem;
+    }
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+
+    @media (max-width: $tablet) {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    @media (max-width: $mobile) {
+        padding: 1rem;
+    }
+}
+
+$mobile: 576px;
+
+.mobile-menu {
+    display: none;
+    flex-direction: column;
+    background-color: white;
+    width: 100%;
+    position: absolute;
+    top: 60px;
+    left: 100px;
+    z-index: 10;
+    padding: 1rem;
+
+    @media (max-width: $mobile) {
+        display: flex;
+    }
+
+    &.open {
+        display: flex;
+    }
+}
