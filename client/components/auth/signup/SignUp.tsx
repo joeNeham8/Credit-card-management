@@ -13,9 +13,12 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import Link from "next/link";
-
-import { api } from "@/app/api";
 import { useRouter } from "next/navigation";
+
+// Import Firebase Auth
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { firebaseApp } from "../../../src/firebaseConfig"; // Import Firebase config
+
 export default function SignUp() {
     const router = useRouter();
     const toast = useToast();
@@ -23,13 +26,15 @@ export default function SignUp() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-
     const [loading, setLoading] = useState(false);
+
+    // Initialize Firebase Auth
+    const auth = getAuth(firebaseApp);
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        if (!email || !password) {
+        if (!email || !password || !confirmPassword) {
             toast({
                 title: "Please fill all the fields.",
                 status: "warning",
@@ -49,56 +54,47 @@ export default function SignUp() {
             return;
         }
 
-        const details = {
-            email: email,
-            password: password,
-        };
         setLoading(true);
-        api.post("/accounts/create/", details)
-            .then((res) => {
+
+        // Firebase Signup
+        createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
                 setLoading(false);
-                console.log("Signup Response:", res.data);
+                console.log("Signup Success:", userCredential);
+
                 toast({
                     title: "Account created successfully.",
                     status: "success",
                     duration: 3000,
                     isClosable: true,
                 });
+
                 setTimeout(() => {
                     router.push("/auth/login");
                 }, 2000);
             })
-            .catch((err) => {
+            .catch((error) => {
                 setLoading(false);
-                if (err.response && err.response.data) {
-                    const data = err.response.data;
-                    let message =
-                        data.message ||
-                        data.detail ||
-                        data.email ||
-                        data.password ||
-                        data;
-                    if (Array.isArray(message)) {
-                        message = message[0];
-                    }
-                    if (typeof message === "object") {
-                        message = "An error occurred. Please try again later.";
-                    }
+                console.error("Firebase Signup Error:", error);
 
-                    toast({
-                        title: message,
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
-                } else {
-                    toast({
-                        title: "An error occurred. Please try again.",
-                        status: "error",
-                        duration: 3000,
-                        isClosable: true,
-                    });
+                let message =
+                    error.message || "An error occurred. Please try again.";
+
+                // Handle common Firebase auth errors
+                if (error.code === "auth/email-already-in-use") {
+                    message = "This email is already in use.";
+                } else if (error.code === "auth/weak-password") {
+                    message = "Password should be at least 6 characters.";
+                } else if (error.code === "auth/invalid-email") {
+                    message = "Invalid email format.";
                 }
+
+                toast({
+                    title: message,
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                });
             });
     }
 
@@ -126,7 +122,6 @@ export default function SignUp() {
                     <Stack spacing={4}>
                         <FormControl isRequired>
                             <FormLabel>Email address</FormLabel>
-
                             <Input
                                 type="email"
                                 placeholder="Enter your email"
@@ -168,12 +163,7 @@ export default function SignUp() {
 
                         <Text textAlign="center" mt={2}>
                             Already have an account?{" "}
-                            <Button
-                                variant="link"
-                                colorScheme="teal"
-                                // onClick={navigateToLogin}
-                            >
-                                {/* Login */}
+                            <Button variant="link" colorScheme="teal">
                                 <Link href="/auth/login">Login</Link>
                             </Button>
                         </Text>
