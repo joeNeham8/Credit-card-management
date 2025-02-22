@@ -1,0 +1,59 @@
+.dashboardContainer {
+    padding: 24px;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: 1fr;
+  
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  .card {
+    background-color: var(--chakra-colors-white);
+    border-radius: var(--chakra-radii-md);
+    box-shadow: var(--chakra-shadows-md);
+    padding: var(--chakra-space-4);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: var(--chakra-fontWeights-bold);
+  }
+  
+  .cardContent {
+    font-size: var(--chakra-fontSizes-2xl);
+    font-weight: var(--chakra-fontWeights-bold);
+  }
+  
+  .tableContainer {
+    overflow-x: auto;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table th, .table td {
+    padding: var(--chakra-space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--chakra-colors-gray-200);
+  }
+  
+  .table th {
+    background-color: var(--chakra-colors-gray-100);
+    font-weight: var(--chakra-fontWeights-bold);
+  }
+  
+  @media (max-width: 768px) {
+    .dashboardContainer {
+      grid-template-columns: 1fr;
+    }
+  }
+  
