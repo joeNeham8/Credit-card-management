@@ -13,8 +13,10 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { api } from "@/app/api";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../src/firebaseConfig"; 
 import Link from "next/link";
+
 export default function Login() {
     const router = useRouter();
     const toast = useToast();
@@ -26,9 +28,9 @@ export default function Login() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
-        const data = { email: email, password: password };
-        api.post("/accounts/token/", data)
-            .then(() => {
+
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
                 setLoading(false);
                 toast({
                     title: "Login successful.",
@@ -38,22 +40,13 @@ export default function Login() {
                     isClosable: true,
                 });
                 setTimeout(() => {
-                    router.push("/");
+                    router.push("/dashboard");
                 }, 2000);
             })
-            .catch((err) => {
+            .catch((error) => {
                 setLoading(false);
-                let message = "An error occurred. Please try again later.";
-                if (err.response) {
-                    const res = err.response;
-                    message = res.email || res.password || res.detail || res;
-                    if (Array.isArray(message)) {
-                        message = message[0];
-                    }
-                    else if (typeof message === "object") {
-                        message = "An error occurred. Please try again later.";
-                    }
-                }
+                let message = error.message;
+
                 toast({
                     title: "Login failed.",
                     description: message,
