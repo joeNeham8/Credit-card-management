@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../src/firebaseConfig"; 
+import { auth } from "../../../src/firebaseConfig";
 import Link from "next/link";
 
 export default function Login() {
@@ -97,6 +97,17 @@ export default function Login() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </FormControl>
+                        <Text fontSize="sm" textAlign="right">
+                            <Link href="/auth/forgotpassword" passHref>
+                                <Button
+                                    variant="link"
+                                    colorScheme="teal"
+                                    size="sm"
+                                >
+                                    Forgot Password?
+                                </Button>
+                            </Link>
+                        </Text>
                         <Button
                             bg="var(--accent-color)"
                             type="submit"
