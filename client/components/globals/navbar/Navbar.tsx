@@ -44,6 +44,7 @@ export default function Navbar() {
             duration: 3000,
             isClosable: true,
         });
+        router.push("/");
     };
 
     function handleLogin() {
@@ -141,7 +142,9 @@ export default function Navbar() {
                             <PopoverTrigger>
                                 <Flex align="center" cursor="pointer">
                                     <Image
-                                        src="/assets/avatar/user.png"
+                                        src={`https://api.dicebear.com/8.x/identicon/svg?seed=${encodeURIComponent(
+                                            userData?.email || "default"
+                                        )}`}
                                         alt="User Avatar"
                                         width={10}
                                         height={10}
@@ -232,7 +235,7 @@ export default function Navbar() {
                     {isAuthenticated && userData ? (
                         <Flex align="center" mb={4}>
                             <Image
-                                src="/assets/avatar/user.png"
+                                src={`https://api.dicebear.com/7.x/identicon/svg?seed=${userData.email}`}
                                 alt="User Avatar"
                                 width={6}
                                 height={6}
@@ -251,8 +254,8 @@ export default function Navbar() {
                         onClick={() => handleNavigateTo("/")}
                         mt={2}
                         fontWeight={500}
-                        fontSize="sm" // Decreased font size
-                        paddingY={2} // Added padding for better spacing
+                        fontSize="sm"
+                        paddingY={2}
                     >
                         Home
                     </Text>
@@ -261,8 +264,8 @@ export default function Navbar() {
                         onClick={() => handleNavigateTo("/employees")}
                         mt={5}
                         fontWeight={500}
-                        fontSize="sm" // Decreased font size
-                        paddingY={2} // Added padding for better spacing
+                        fontSize="sm"
+                        paddingY={2}
                     >
                         Employees
                     </Text>
@@ -274,8 +277,8 @@ export default function Navbar() {
                             mt={20}
                             width={"100%"}
                             fontWeight={500}
-                            size="lg" // Increased size
-                            paddingY={4} // Added padding for better appearance
+                            size="lg"
+                            paddingY={4}
                         >
                             Logout
                         </Button>
@@ -288,8 +291,8 @@ export default function Navbar() {
                                 mt={20}
                                 width={"100%"}
                                 fontWeight={600}
-                                size="lg" // Increased size
-                                paddingY={4} // Added padding for better appearance
+                                size="lg"
+                                paddingY={4}
                             >
                                 Sign Up
                             </Button>
@@ -299,8 +302,8 @@ export default function Navbar() {
                                 mt={4}
                                 width={"100%"}
                                 fontWeight={600}
-                                size="lg" // Increased size
-                                paddingY={4} // Added padding for better appearance
+                                size="lg"
+                                paddingY={4}
                             >
                                 Login
                             </Button>
