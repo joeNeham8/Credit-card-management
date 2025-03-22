@@ -3,7 +3,19 @@
 import { useState } from "react";
 import { auth } from "../../../src/firebaseConfig";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { Box, Button, Input, Text, useToast } from "@chakra-ui/react";
+import {
+    Box,
+    Button,
+    Input,
+    Text,
+    useToast,
+    Heading,
+    VStack,
+    FormControl,
+    FormLabel,
+    Icon,
+} from "@chakra-ui/react";
+import { FiMail } from "react-icons/fi";
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -45,25 +57,52 @@ const ForgotPassword = () => {
     };
 
     return (
-        <Box p={6} maxW="400px" mx="auto">
-            <Text fontSize="xl" fontWeight="bold" mb={4}>
-                Forgot Password
-            </Text>
-            <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                mb={3}
-            />
-            <Button
-                colorScheme="blue"
-                isLoading={loading}
-                onClick={handleResetPassword}
-                width="full"
+        <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minH="100vh"
+            bg="gray.100"
+        >
+            <Box
+                bg="white"
+                p={8}
+                boxShadow="md"
+                borderRadius="lg"
+                maxW="400px"
+                w="full"
+                textAlign="center"
             >
-                Reset Password
-            </Button>
+                <Icon as={FiMail} boxSize={12} color="blue.500" mb={4} />
+                <Heading fontSize="2xl" mb={2}>
+                    Forgot Password?
+                </Heading>
+                <Text fontSize="sm" color="gray.600" mb={4}>
+                    Enter your email and we'll send you a reset link.
+                </Text>
+                <VStack spacing={4} align="stretch">
+                    <FormControl>
+                        <FormLabel>Email Address</FormLabel>
+                        <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            bg="gray.50"
+                            borderRadius="md"
+                        />
+                    </FormControl>
+                    <Button
+                        colorScheme="blue"
+                        isLoading={loading}
+                        onClick={handleResetPassword}
+                        w="full"
+                        borderRadius="md"
+                    >
+                        Send Reset Link
+                    </Button>
+                </VStack>
+            </Box>
         </Box>
     );
 };
