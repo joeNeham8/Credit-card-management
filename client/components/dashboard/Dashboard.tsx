@@ -20,159 +20,243 @@ import {
     VStack,
     Grid,
     GridItem,
+    Button,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure,
 } from "@chakra-ui/react";
-import { FaCreditCard, FaDollarSign, FaClock } from "react-icons/fa";
-
-// Simulated User Data (Replace with API/Auth Data)
-const user = {
-    name: "John Doe",
-    email: "johndoe@example.com",
-    profilePic: "https://i.pravatar.cc/100",
-    totalBalance: 3700,
-    upcomingDue: 500,
-    cards: [
-        { bank: "Chase", number: "**** 1234", balance: 2500, limit: 5000 },
-        { bank: "Amex", number: "**** 5678", balance: 1200, limit: 3000 },
-    ],
-    transactions: [
-        { merchant: "Amazon", amount: 120, date: "2025-02-14" },
-        { merchant: "Starbucks", amount: 8, date: "2025-02-13" },
-    ],
-};
+import { FaCreditCard, FaDollarSign, FaClock, FaPlus } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { db, auth } from "../../src/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import AddCard from "../globals/addcard/AddCard";
 
 const Dashboard = () => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [cards, setCards] = useState([]);
+    const [userId, setUserId] = useState(null);
+
+    // Fetch user ID
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUserId(user.uid);
+            } else {
+                setUserId(null);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    // Fetch cards when userId is available
+    useEffect(() => {
+        if (!userId) return;
+
+        const fetchCards = async () => {
+            try {
+                const querySnapshot = await getDocs(
+                    collection(db, "users", userId, "cards")
+                );
+                const cardData = querySnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setCards(cardData);
+            } catch (error) {
+                console.error("Error fetching cards:", error);
+            }
+        };
+
+        fetchCards();
+    }, [userId]);
+
     return (
-        <Grid 
-            templateColumns={{ base: "1fr", md: "1fr 3fr" }} 
-            gap={6} 
-            p={6} 
-            bg="gray.50" 
+        <Grid
+            templateColumns={{ base: "1fr", md: "1fr 3fr" }}
+            gap={6}
+            p={6}
+            bg="gray.50"
             minH="100vh"
         >
             {/* Left Column: User Profile */}
             <GridItem>
                 <Card p={6} shadow="lg" borderRadius="lg" bg="white">
                     <VStack align="center" spacing={4}>
-                        <Avatar size="xl" name={user.name} src={user.profilePic} />
-                        <Text fontSize="xl" fontWeight="bold">{user.name}</Text>
-                        <Text fontSize="sm" color="gray.500">{user.email}</Text>
+                        <Avatar
+                            size="xl"
+                            name="John Doe"
+                            src="https://i.pravatar.cc/100"
+                        />
+                        <Text fontSize="xl" fontWeight="bold">
+                            John Doe
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                            johndoe@example.com
+                        </Text>
                     </VStack>
                 </Card>
             </GridItem>
 
             {/* Right Column: Main Content */}
             <GridItem>
-                {/* Summary Cards */}
                 <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={6}>
                     <Card p={4} shadow="lg" borderRadius="lg" bg="white">
-                        <CardHeader display="flex" justifyContent="space-between">
+                        <CardHeader
+                            display="flex"
+                            justifyContent="space-between"
+                        >
                             <Text fontWeight="bold">Total Balance</Text>
                             <Icon as={FaDollarSign} color="green.500" />
                         </CardHeader>
                         <CardBody>
-                            <Text fontSize="2xl" fontWeight="bold" color="green.600">
-                                ${user.totalBalance}
+                            <Text
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="green.600"
+                            >
+                                $3700
                             </Text>
                         </CardBody>
                     </Card>
 
                     <Card p={4} shadow="lg" borderRadius="lg" bg="white">
-                        <CardHeader display="flex" justifyContent="space-between">
+                        <CardHeader
+                            display="flex"
+                            justifyContent="space-between"
+                        >
                             <Text fontWeight="bold">Upcoming Due</Text>
                             <Icon as={FaClock} color="red.500" />
                         </CardHeader>
                         <CardBody>
-                            <Text fontSize="2xl" fontWeight="bold" color="red.600">
-                                ${user.upcomingDue}
+                            <Text
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="red.600"
+                            >
+                                $500
                             </Text>
                         </CardBody>
                     </Card>
 
                     <Card p={4} shadow="lg" borderRadius="lg" bg="white">
-                        <CardHeader display="flex" justifyContent="space-between">
+                        <CardHeader
+                            display="flex"
+                            justifyContent="space-between"
+                        >
                             <Text fontWeight="bold">Cards in Use</Text>
                             <Icon as={FaCreditCard} color="blue.500" />
                         </CardHeader>
                         <CardBody>
-                            <Text fontSize="2xl" fontWeight="bold" color="blue.600">
-                                {user.cards.length}
+                            <Text
+                                fontSize="2xl"
+                                fontWeight="bold"
+                                color="blue.600"
+                            >
+                                {cards.length}
                             </Text>
                         </CardBody>
                     </Card>
                 </SimpleGrid>
 
-                {/* Credit Cards Table */}
                 <Card p={4} shadow="lg" borderRadius="lg" bg="white" mb={6}>
-                    <CardHeader>
+                    <CardHeader display="flex" justifyContent="space-between">
                         <Text fontWeight="bold">Your Credit Cards</Text>
+                        <Button
+                            leftIcon={<FaPlus />}
+                            colorScheme="blue"
+                            onClick={onOpen}
+                        >
+                            Add New Card
+                        </Button>
                     </CardHeader>
                     <CardBody overflowX="auto">
                         <Table variant="simple">
                             <Thead bg="gray.100">
                                 <Tr>
-                                    <Th>Bank</Th>
+                                    <Th>Bank Name</Th>
                                     <Th>Card Number</Th>
                                     <Th>Balance</Th>
+                                    <Th>Expiry Date</Th>
                                     <Th>Limit</Th>
                                     <Th>Utilization</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {user.cards.map((card, index) => {
-                                    const utilization = (card.balance / card.limit) * 100;
-                                    return (
-                                        <Tr key={index}>
-                                            <Td>{card.bank}</Td>
-                                            <Td>{card.number}</Td>
-                                            <Td fontWeight="bold" color={utilization > 80 ? "red.500" : "green.500"}>
+                                {cards.length > 0 ? (
+                                    cards.map((card) => (
+                                        <Tr key={card.id}>
+                                            <Td>{card.bank}</Td> 
+                                            <Td>
+                                                **** {card.cardNumber.slice(-4)}
+                                            </Td>
+                                            <Td
+                                                fontWeight="bold"
+                                                color={
+                                                    card.balance > 0
+                                                        ? "green.500"
+                                                        : "red.500"
+                                                }
+                                            >
                                                 ${card.balance}
                                             </Td>
+                                            <Td>{card.expiryDate}</Td>{" "}
+                                           
                                             <Td>${card.limit}</Td>
                                             <Td width="200px">
-                                                <Progress 
-                                                    value={utilization} 
-                                                    colorScheme={utilization > 80 ? "red" : "green"} 
-                                                    size="sm" 
-                                                    borderRadius="md" 
+                                                <Progress
+                                                    value={
+                                                        (card.balance /
+                                                            card.limit) *
+                                                        100
+                                                    }
+                                                    colorScheme="green"
+                                                    size="sm"
+                                                    borderRadius="md"
                                                 />
-                                                <Text fontSize="sm" textAlign="center" mt={1}>
-                                                    {utilization.toFixed(1)}%
+                                                <Text
+                                                    fontSize="sm"
+                                                    textAlign="center"
+                                                    mt={1}
+                                                >
+                                                    {(
+                                                        (card.balance /
+                                                            card.limit) *
+                                                        100
+                                                    ).toFixed(0)}
+                                                    %
                                                 </Text>
                                             </Td>
                                         </Tr>
-                                    );
-                                })}
+                                    ))
+                                ) : (
+                                    <Tr>
+                                        <Td colSpan={5} textAlign="center">
+                                            No cards available
+                                        </Td>
+                                    </Tr>
+                                )}
                             </Tbody>
                         </Table>
                     </CardBody>
                 </Card>
 
-                {/* Transactions Table */}
-                <Card p={4} shadow="lg" borderRadius="lg" bg="white">
-                    <CardHeader>
-                        <Text fontWeight="bold">Recent Transactions</Text>
-                    </CardHeader>
-                    <CardBody overflowX="auto">
-                        <Table variant="simple">
-                            <Thead bg="gray.100">
-                                <Tr>
-                                    <Th>Merchant</Th>
-                                    <Th>Amount</Th>
-                                    <Th>Date</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {user.transactions.map((tx, index) => (
-                                    <Tr key={index} _hover={{ bg: "gray.50" }}>
-                                        <Td>{tx.merchant}</Td>
-                                        <Td fontWeight="bold">${tx.amount}</Td>
-                                        <Td>{tx.date}</Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    </CardBody>
-                </Card>
+               
+                <Modal isOpen={isOpen} onClose={onClose} isCentered>
+                    <ModalOverlay />
+                    <ModalContent maxW="800px" width="100%">
+                        <ModalHeader>Add New Card</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody>
+                            <AddCard onClose={onClose} userId={userId} />
+                        </ModalBody>
+                    </ModalContent>
+                </Modal>
             </GridItem>
         </Grid>
     );

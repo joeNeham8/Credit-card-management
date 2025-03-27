@@ -14,27 +14,13 @@ import {
     Icon,
     Select,
 } from "@chakra-ui/react";
-import axios from "axios";
-import { auth } from "../../../src/firebaseConfig";
+import { auth, db } from "../../../src/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import { FaCreditCard } from "react-icons/fa";
-
-// function handleCardNumberChange(input: string) {
-//     // Remove all non-digit characters
-//     let formatted = input.replace(/\D/g, "");
-
-//     // Limit to 16 digits
-//     formatted = formatted.slice(0, 16);
-
-//     // Add spaces after every 4 digits
-//     formatted = formatted.replace(/(\d{4})/g, "$1 ").trim();
-
-//     setCardNumber(formatted);
-// }
 
 export default function AddCard() {
     const [cardNumber, setCardNumber] = useState("");
-    const [cardHolder, setCardHolder] = useState("");
     const [expiryDate, setExpiryDate] = useState("");
     const [cvv, setCvv] = useState("");
     const [bank, setBank] = useState("");
@@ -44,22 +30,42 @@ export default function AddCard() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) setUserId(user.uid);
+            if (user) {
+                setUserId(user.uid);
+                console.log("User ID set:", user.uid);
+            }
         });
 
         return () => unsubscribe();
     }, []);
 
+    function formatCardNumber(value) {
+        return value
+            .replace(/\D/g, "")
+            .replace(/(.{4})/g, "$1 ")
+            .trim()
+            .substring(0, 19);
+    }
+
     async function handleAddCard() {
+        console.log("Submitting form...");
+
+        if (!userId) {
+            console.error("User ID is not available!");
+            toast({
+                title: "Error",
+                description: "User not authenticated.",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
+
         const selectedBank = bank === "Other" ? customBank : bank;
 
-        if (
-            !cardNumber ||
-            !cardHolder ||
-            !expiryDate ||
-            !cvv ||
-            !selectedBank
-        ) {
+        if (!cardNumber || !expiryDate || !cvv || !selectedBank) {
+            console.log("Form validation failed!");
             toast({
                 title: "Error",
                 description: "Please fill all fields.",
@@ -70,15 +76,23 @@ export default function AddCard() {
             return;
         }
 
+        const cardData = {
+            cardNumber,
+            expiryDate,
+            cvv,
+            bank: selectedBank,
+        };
+
+        console.log("Card Data Before Saving:", cardData);
+
         try {
-            await axios.post("http://localhost:5000/api/add-card", {
-                uid: userId,
-                cardNumber,
-                cardHolder,
-                expiryDate,
-                cvv,
-                bank: selectedBank,
-            });
+            console.log("Adding card to Firestore...");
+            await setDoc(
+                doc(db, "users", userId, "cards", cardNumber),
+                cardData
+            );
+
+            console.log("Card added successfully!");
 
             toast({
                 title: "Success",
@@ -89,12 +103,12 @@ export default function AddCard() {
             });
 
             setCardNumber("");
-            setCardHolder("");
             setExpiryDate("");
             setCvv("");
             setBank("");
             setCustomBank("");
-        } catch {
+        } catch (error) {
+            console.error("Error adding card: ", error);
             toast({
                 title: "Error",
                 description: "Failed to add card.",
@@ -116,7 +130,7 @@ export default function AddCard() {
         >
             <Box
                 p={6}
-                maxW="800px"
+                maxW="500px"
                 width="100%"
                 borderWidth={1}
                 borderRadius="lg"
@@ -128,69 +142,56 @@ export default function AddCard() {
                     Add New Card
                 </Heading>
 
-                <HStack spacing={6} align="start">
-                    {/* Left Column */}
-                    <VStack spacing={4} flex={1} align="stretch">
+                <VStack spacing={4} align="stretch">
+                    <FormControl>
+                        <FormLabel>Bank Name</FormLabel>
+                        <Select
+                            placeholder="Select a Bank"
+                            value={bank}
+                            onChange={(e) => setBank(e.target.value)}
+                        >
+                            <option value="State Bank of India">
+                                State Bank of India
+                            </option>
+                            <option value="Union Bank of India">
+                                Union Bank of India
+                            </option>
+                            <option value="HDFC Bank">HDFC Bank</option>
+                            <option value="ICICI Bank">ICICI Bank</option>
+                            <option value="Axis Bank">Axis Bank</option>
+                            <option value="Punjab National Bank">
+                                Punjab National Bank
+                            </option>
+                            <option value="Kotak Mahindra Bank">
+                                Kotak Mahindra Bank
+                            </option>
+                            <option value="Other">Other</option>
+                        </Select>
+                    </FormControl>
+
+                    {bank === "Other" && (
                         <FormControl>
-                            <FormLabel>Card Number</FormLabel>
+                            <FormLabel>Enter Bank Name</FormLabel>
                             <Input
-                                placeholder="1234 5678 9101 1121"
-                                value={cardNumber}
-                                onChange={(e) => setCardNumber(e.target.value)}
+                                placeholder="Enter bank name"
+                                value={customBank}
+                                onChange={(e) => setCustomBank(e.target.value)}
                             />
                         </FormControl>
+                    )}
 
-                        <FormControl>
-                            <FormLabel>Card Holder Name</FormLabel>
-                            <Input
-                                placeholder="John Doe"
-                                value={cardHolder}
-                                onChange={(e) => setCardHolder(e.target.value)}
-                            />
-                        </FormControl>
+                    <FormControl>
+                        <FormLabel>Card Number</FormLabel>
+                        <Input
+                            placeholder="1234 5678 9101 1121"
+                            value={cardNumber}
+                            onChange={(e) =>
+                                setCardNumber(formatCardNumber(e.target.value))
+                            }
+                        />
+                    </FormControl>
 
-                        <FormControl>
-                            <FormLabel>Bank Name</FormLabel>
-                            <Select
-                                placeholder="Select a Bank"
-                                value={bank}
-                                onChange={(e) => setBank(e.target.value)}
-                            >
-                                <option value="State Bank of India">
-                                    State Bank of India
-                                </option>
-                                <option value="State Bank of India">
-                                    Union Bank of India
-                                </option>
-                                <option value="HDFC Bank">HDFC Bank</option>
-                                <option value="ICICI Bank">ICICI Bank</option>
-                                <option value="Axis Bank">Axis Bank</option>
-                                <option value="Punjab National Bank">
-                                    Punjab National Bank
-                                </option>
-                                <option value="Kotak Mahindra Bank">
-                                    Kotak Mahindra Bank
-                                </option>
-                                <option value="Other">Other</option>
-                            </Select>
-                        </FormControl>
-
-                        {bank === "Other" && (
-                            <FormControl>
-                                <FormLabel>Enter Bank Name</FormLabel>
-                                <Input
-                                    placeholder="Enter bank name"
-                                    value={customBank}
-                                    onChange={(e) =>
-                                        setCustomBank(e.target.value)
-                                    }
-                                />
-                            </FormControl>
-                        )}
-                    </VStack>
-
-                    {/* Right Column */}
-                    <VStack spacing={4} flex={1} align="stretch">
+                    <HStack spacing={4} align="stretch">
                         <FormControl>
                             <FormLabel>Expiry Date</FormLabel>
                             <Input
@@ -209,17 +210,12 @@ export default function AddCard() {
                                 type="password"
                             />
                         </FormControl>
+                    </HStack>
 
-                        <Button
-                            colorScheme="blue"
-                            onClick={handleAddCard}
-                            width="full"
-                            mt={4}
-                        >
-                            Add Card
-                        </Button>
-                    </VStack>
-                </HStack>
+                    <Button colorScheme="blue" onClick={handleAddCard} width="full">
+                        Add Card
+                    </Button>
+                </VStack>
             </Box>
         </Box>
     );
