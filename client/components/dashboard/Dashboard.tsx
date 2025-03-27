@@ -29,10 +29,16 @@ import {
     ModalCloseButton,
     useDisclosure,
 } from "@chakra-ui/react";
-import { FaCreditCard, FaDollarSign, FaClock, FaPlus } from "react-icons/fa";
+import {
+    FaCreditCard,
+    FaDollarSign,
+    FaClock,
+    FaPlus,
+    FaTrash,
+} from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { db, auth } from "../../src/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import AddCard from "../globals/addcard/AddCard";
 
@@ -63,6 +69,7 @@ const Dashboard = () => {
                 const querySnapshot = await getDocs(
                     collection(db, "users", userId, "cards")
                 );
+
                 const cardData = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
@@ -76,9 +83,20 @@ const Dashboard = () => {
         fetchCards();
     }, [userId]);
 
+    const handleDeleteCard = async (cardId) => {
+        if (!userId) return;
+
+        try {
+            await deleteDoc(doc(db, "users", userId, "cards", cardId));
+            setCards(cards.filter((card) => card.id !== cardId)); // Update UI after deletion
+        } catch (error) {
+            console.error("Error deleting card:", error);
+        }
+    };
+
     return (
         <Grid
-            templateColumns={{ base: "1fr", md: "1fr 3fr" }}
+            templateColumns={{ base: "2fr", md: "1fr 3fr" }}
             gap={6}
             p={6}
             bg="gray.50"
@@ -183,7 +201,7 @@ const Dashboard = () => {
                                     <Th>Card Number</Th>
                                     <Th>Balance</Th>
                                     <Th>Expiry Date</Th>
-                                    <Th>Limit</Th>
+                                    {/* <Th>Limit</Th> */}
                                     <Th>Utilization</Th>
                                 </Tr>
                             </Thead>
@@ -191,7 +209,15 @@ const Dashboard = () => {
                                 {cards.length > 0 ? (
                                     cards.map((card) => (
                                         <Tr key={card.id}>
-                                            <Td>{card.bank}</Td> 
+                                            <Td>
+                                                <Avatar
+                                                    src={card.bankLogo}
+                                                    size="sm"
+                                                    name={card.bankName} // Fallback text if the image fails
+                                                    mr={2} // Adds spacing between logo and bank name
+                                                />
+                                                {card.bank}
+                                            </Td>
                                             <Td>
                                                 **** {card.cardNumber.slice(-4)}
                                             </Td>
@@ -206,8 +232,7 @@ const Dashboard = () => {
                                                 ${card.balance}
                                             </Td>
                                             <Td>{card.expiryDate}</Td>{" "}
-                                           
-                                            <Td>${card.limit}</Td>
+                                            {/* <Td>${card.limit}</Td> */}
                                             <Td width="200px">
                                                 <Progress
                                                     value={
@@ -232,6 +257,20 @@ const Dashboard = () => {
                                                     %
                                                 </Text>
                                             </Td>
+                                            {/* Delete Button */}
+                                            <Td>
+                                                <Button
+                                                    colorScheme="red"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        handleDeleteCard(
+                                                            card.id
+                                                        )
+                                                    }
+                                                >
+                                                    <Icon as={FaTrash} />
+                                                </Button>
+                                            </Td>
                                         </Tr>
                                     ))
                                 ) : (
@@ -246,7 +285,6 @@ const Dashboard = () => {
                     </CardBody>
                 </Card>
 
-               
                 <Modal isOpen={isOpen} onClose={onClose} isCentered>
                     <ModalOverlay />
                     <ModalContent maxW="800px" width="100%">
