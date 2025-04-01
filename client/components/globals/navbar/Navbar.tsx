@@ -38,17 +38,22 @@ export default function Navbar() {
         logout();
         setIsAuthenticated(false);
         setUserData(null);
+        localStorage.removeItem("authToken"); // Remove token if using localStorage
+    sessionStorage.removeItem("authToken"); // Remove session token if used
         toast({
             title: "Logged out successfully",
             status: "success",
             duration: 3000,
             isClosable: true,
         });
-        router.push("/");
+        router.push("/auth/login");
     };
 
     function handleLogin() {
         router.push("/auth/login");
+        setTimeout(() => {
+            checkAuth(); // Re-check authentication
+        }, 1500); // Delay to ensure auth updatesHey, Cortana. 
     }
 
     function handleSignUp() {
@@ -67,9 +72,12 @@ export default function Navbar() {
     const checkAuth = async () => {
         try {
             const response = await api.get("accounts/me/");
+            console.log("Auth Response:", response.data);
+            console.log("Lamoooooo ");
             setIsAuthenticated(true);
             setUserData(response.data);
-        } catch {
+        } catch (error) {
+            console.error("Auth Error:", error); // Debugging
             setIsAuthenticated(false);
             setUserData(null);
         }
@@ -77,7 +85,7 @@ export default function Navbar() {
 
     useEffect(() => {
         checkAuth();
-    }, []);
+    }, [isAuthenticated]);
 
     return (
         <Box
@@ -130,7 +138,7 @@ export default function Navbar() {
                             onClick={() => handleNavigateTo("/employees")}
                             fontWeight={600}
                         >
-                            Employees
+                            
                         </Text>
                     </Stack>
 
@@ -142,9 +150,7 @@ export default function Navbar() {
                             <PopoverTrigger>
                                 <Flex align="center" cursor="pointer">
                                     <Image
-                                        src={`https://api.dicebear.com/8.x/identicon/svg?seed=${encodeURIComponent(
-                                            userData?.email || "default"
-                                        )}`}
+                                        src="/assets/avatar/user.png"
                                         alt="User Avatar"
                                         width={10}
                                         height={10}
@@ -202,7 +208,7 @@ export default function Navbar() {
                                 Sign Up
                             </Button>
                             <Button
-                                bg={"var(--primary-color)"}
+                                bg={"var(--accent-color)"}
                                 onClick={handleLogin}
                                 _hover={{ bg: "var(--secondary-color)" }}
                                 fontWeight={600}
@@ -235,7 +241,7 @@ export default function Navbar() {
                     {isAuthenticated && userData ? (
                         <Flex align="center" mb={4}>
                             <Image
-                                src={`https://api.dicebear.com/7.x/identicon/svg?seed=${userData.email}`}
+                                src="/assets/avatar/user.png"
                                 alt="User Avatar"
                                 width={6}
                                 height={6}
@@ -254,8 +260,8 @@ export default function Navbar() {
                         onClick={() => handleNavigateTo("/")}
                         mt={2}
                         fontWeight={500}
-                        fontSize="sm"
-                        paddingY={2}
+                        fontSize="sm" // Decreased font size
+                        paddingY={2} // Added padding for better spacing
                     >
                         Home
                     </Text>
@@ -264,8 +270,8 @@ export default function Navbar() {
                         onClick={() => handleNavigateTo("/employees")}
                         mt={5}
                         fontWeight={500}
-                        fontSize="sm"
-                        paddingY={2}
+                        fontSize="sm" // Decreased font size
+                        paddingY={2} // Added padding for better spacing
                     >
                         Employees
                     </Text>
@@ -277,8 +283,8 @@ export default function Navbar() {
                             mt={20}
                             width={"100%"}
                             fontWeight={500}
-                            size="lg"
-                            paddingY={4}
+                            size="lg" // Increased size
+                            paddingY={4} // Added padding for better appearance
                         >
                             Logout
                         </Button>
@@ -291,8 +297,8 @@ export default function Navbar() {
                                 mt={20}
                                 width={"100%"}
                                 fontWeight={600}
-                                size="lg"
-                                paddingY={4}
+                                size="lg" // Increased size
+                                paddingY={4} // Added padding for better appearance
                             >
                                 Sign Up
                             </Button>
@@ -302,7 +308,7 @@ export default function Navbar() {
                                 mt={4}
                                 width={"100%"}
                                 fontWeight={600}
-                                size="lg"
+                                size="lg" 
                                 paddingY={4}
                             >
                                 Login

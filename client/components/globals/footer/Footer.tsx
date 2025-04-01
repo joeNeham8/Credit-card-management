@@ -67,12 +67,12 @@ export default function Footer() {
                 <Text fontSize="sm">
                     Created by &nbsp;
                     <Link
-                        href="https://linktr.ee/Abhishek10351"
+                        href="https://www.linkedin.com/in/subhrajittalukdar/"
                         fontSize="sm"
                         mr={2}
                         target="_blank"
                     >
-                        Abhishek Kashyap
+                       Subhrajit Talukdar 
                     </Link>
                     &
                     <Link
@@ -81,7 +81,7 @@ export default function Footer() {
                         ml={2}
                         target="_blank"
                     >
-                        Subhrajit Talukdar
+                        Neham Joe Baiju
                     </Link>
                 </Text>
             </VStack>

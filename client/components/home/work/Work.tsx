@@ -31,9 +31,9 @@ export default function HowItWorks() {
                     fontSize="lg"
                     fontFamily="var(--font-primary)"
                 >
-                    Our HR management tool simplifies employee registration,
-                    performance tracking, and task assignment, offering a
-                    streamlined experience for HR departments and employees.
+                    Our Credit Card management tool simplifies Credit card
+                    holding, performance tracking, and task assignment, offering
+                    a streamlined experience for users.
                 </Text>
 
                 <Flex justify="space-around" wrap="wrap">
@@ -58,7 +58,7 @@ export default function HowItWorks() {
                             fontFamily="var(--font-heading)"
                             fontSize={22}
                         >
-                            Register Employee
+                            Register User
                         </Heading>
                         <Text
                             fontSize="l"
@@ -66,9 +66,8 @@ export default function HowItWorks() {
                             fontWeight={"500"}
                             fontFamily="var(--font-heading)"
                         >
-                            Easily register new employees with all necessary
-                            information like name, email, department, and
-                            contact details.
+                            Easily register new user with all necessary
+                            information like name, email and contact details.
                         </Text>
                     </VStack>
 
@@ -93,7 +92,7 @@ export default function HowItWorks() {
                             fontFamily="var(--font-heading)"
                             fontSize={22}
                         >
-                            Manage Employee Data
+                            Manage Card Data
                         </Heading>
                         <Text
                             fontSize="l"
@@ -101,9 +100,8 @@ export default function HowItWorks() {
                             fontWeight={"500"}
                             fontFamily="var(--font-heading)"
                         >
-                            Keep track of all employee records, including
-                            personal details, performance metrics, and
-                            department assignments.
+                            Keep track of all cards, including personal details,
+                            performance metrics and much more
                         </Text>
                     </VStack>
 
@@ -128,7 +126,7 @@ export default function HowItWorks() {
                             fontFamily="var(--font-heading)"
                             fontSize={22}
                         >
-                            Assign and Track Tasks
+                            Assign and Track logs
                         </Heading>
                         <Text
                             fontSize="l"
@@ -137,8 +135,8 @@ export default function HowItWorks() {
                             fontFamily="var(--font-heading)"
                             fontWeight={"500"}
                         >
-                            Assign tasks to employees and monitor progress to
-                            ensure deadlines are met efficiently.
+                            Assign limits to monitor logs to ensure deadlines
+                            are met efficiently.
                         </Text>
                     </VStack>
                 </Flex>
