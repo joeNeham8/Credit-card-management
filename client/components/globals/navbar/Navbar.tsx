@@ -22,7 +22,7 @@ import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import "./Navbar.scss";
 import { api, logout } from "@/app/api";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { app } from "../../../src/firebaseConfig"; // your Firebase config file
+import { app } from "../../../src/firebaseConfig"; 
 type UserData = {
     email: string;
 };
