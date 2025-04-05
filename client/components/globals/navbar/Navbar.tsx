@@ -15,14 +15,21 @@ import {
     PopoverHeader,
     PopoverBody,
     useToast,
+    useColorMode,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import {
+    HamburgerIcon,
+    CloseIcon,
+    ChevronDownIcon,
+    MoonIcon,
+    SunIcon,
+} from "@chakra-ui/icons";
 import "./Navbar.scss";
 import { api, logout } from "@/app/api";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { app } from "../../../src/firebaseConfig"; 
+import { app } from "../../../src/firebaseConfig";
 type UserData = {
     email: string;
 };
@@ -34,6 +41,7 @@ export default function Navbar() {
     const [userData, setUserData] = useState<UserData | null>(null);
     const [isArrowRotated, setIsArrowRotated] = useState(false);
     const toast = useToast();
+    const { colorMode, toggleColorMode } = useColorMode();
 
     const handleLogout = async () => {
         const auth = getAuth(app);
@@ -62,8 +70,8 @@ export default function Navbar() {
     function handleLogin() {
         router.push("/auth/login");
         setTimeout(() => {
-            checkAuth(); // Re-check authentication
-        }, 1500); // Delay to ensure auth updatesHey, Cortana.
+            checkAuth();
+        }, 1500);
     }
 
     function handleSignUp() {
@@ -234,6 +242,15 @@ export default function Navbar() {
                             </Button>
                         </>
                     )}
+                    <IconButton
+                        aria-label="Toggle Theme"
+                        icon={
+                            colorMode === "light" ? <MoonIcon /> : <SunIcon />
+                        }
+                        onClick={toggleColorMode}
+                        variant="ghost"
+                        ml={4}
+                    />
                 </Flex>
             </Flex>
 
