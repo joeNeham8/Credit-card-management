@@ -15,13 +15,21 @@ import {
     PopoverHeader,
     PopoverBody,
     useToast,
+    useColorMode,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import {
+    HamburgerIcon,
+    CloseIcon,
+    ChevronDownIcon,
+    MoonIcon,
+    SunIcon,
+} from "@chakra-ui/icons";
 import "./Navbar.scss";
 import { api, logout } from "@/app/api";
-
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { app } from "../../../src/firebaseConfig";
 type UserData = {
     email: string;
 };
@@ -33,27 +41,37 @@ export default function Navbar() {
     const [userData, setUserData] = useState<UserData | null>(null);
     const [isArrowRotated, setIsArrowRotated] = useState(false);
     const toast = useToast();
+    const { colorMode, toggleColorMode } = useColorMode();
 
-    const handleLogout = () => {
-        logout();
-        setIsAuthenticated(false);
-        setUserData(null);
-        localStorage.removeItem("authToken"); // Remove token if using localStorage
-    sessionStorage.removeItem("authToken"); // Remove session token if used
-        toast({
-            title: "Logged out successfully",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-        });
-        router.push("/auth/login");
+    const handleLogout = async () => {
+        const auth = getAuth(app);
+        try {
+            await signOut(auth);
+            setIsAuthenticated(false);
+            setUserData(null);
+            toast({
+                title: "Logged out successfully",
+                status: "success",
+                duration: 3000,
+                isClosable: true,
+            });
+            router.push("/auth/login");
+        } catch (error) {
+            console.error("Logout Error:", error);
+            toast({
+                title: "Logout failed",
+                status: "error",
+                duration: 3000,
+                isClosable: true,
+            });
+        }
     };
 
     function handleLogin() {
         router.push("/auth/login");
         setTimeout(() => {
-            checkAuth(); // Re-check authentication
-        }, 1500); // Delay to ensure auth updatesHey, Cortana. 
+            checkAuth();
+        }, 1500);
     }
 
     function handleSignUp() {
@@ -70,22 +88,31 @@ export default function Navbar() {
     }
 
     const checkAuth = async () => {
-        try {
-            const response = await api.get("accounts/me/");
-            console.log("Auth Response:", response.data);
-            console.log("Lamoooooo ");
-            setIsAuthenticated(true);
-            setUserData(response.data);
-        } catch (error) {
-            console.error("Auth Error:", error); // Debugging
-            setIsAuthenticated(false);
-            setUserData(null);
-        }
+        // try {
+        //     const response = await api.get("accounts/me/");
+        //     console.log("Auth Response:", response.data);
+        //     setIsAuthenticated(true);
+        //     setUserData(response.data);
+        // } catch (error) {
+        //     console.error("Auth Error:", error); // Debugging
+        //     setIsAuthenticated(false);
+        //     setUserData(null);
+        // }
     };
 
     useEffect(() => {
-        checkAuth();
-    }, [isAuthenticated]);
+        const auth = getAuth(app);
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsAuthenticated(true);
+                setUserData({ email: user.email ?? "User" });
+            } else {
+                setIsAuthenticated(false);
+                setUserData(null);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
 
     return (
         <Box
@@ -137,9 +164,7 @@ export default function Navbar() {
                             cursor="pointer"
                             onClick={() => handleNavigateTo("/employees")}
                             fontWeight={600}
-                        >
-                            
-                        </Text>
+                        ></Text>
                     </Stack>
 
                     {isAuthenticated ? (
@@ -217,6 +242,15 @@ export default function Navbar() {
                             </Button>
                         </>
                     )}
+                    <IconButton
+                        aria-label="Toggle Theme"
+                        icon={
+                            colorMode === "light" ? <MoonIcon /> : <SunIcon />
+                        }
+                        onClick={toggleColorMode}
+                        variant="ghost"
+                        ml={4}
+                    />
                 </Flex>
             </Flex>
 
@@ -308,7 +342,7 @@ export default function Navbar() {
                                 mt={4}
                                 width={"100%"}
                                 fontWeight={600}
-                                size="lg" 
+                                size="lg"
                                 paddingY={4}
                             >
                                 Login
